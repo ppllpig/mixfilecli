@@ -3,9 +3,17 @@
 FROM openjdk:17-jdk-slim as builder
 
 # 安装项目 toolchain 所需的 JDK 8。
-# apt-get update && apt-get install -y openjdk-8-jdk
-# 这样构建环境中就同时存在了 JDK 17 (默认) 和 JDK 8。
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk
+# 由于 Debian 11 (Bullseye) 的默认源中没有 openjdk-8-jdk，
+# 我们需要添加 Eclipse Temurin (前 AdoptOpenJDK) 的软件源来安装。
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    apt-transport-https \
+    gnupg \
+    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor > /usr/share/keyrings/adoptium.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends temurin-8-jdk \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
