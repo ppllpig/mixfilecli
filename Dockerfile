@@ -10,6 +10,7 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
+COPY gradle.properties .
 COPY src src
 
 # 赋予 gradlew 执行权限
