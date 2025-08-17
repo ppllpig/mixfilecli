@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https \
     gnupg \
     && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor > /usr/share/keyrings/adoptium.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" > /etc/apt/sources.list.d/adoptium.list \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bullseye main" > /etc/apt/sources.list.d/adoptium.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends temurin-8-jdk \
     && rm -rf /var/lib/apt/lists/*
