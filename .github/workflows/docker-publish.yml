@@ -32,11 +32,12 @@ jobs:
           repository: 'InvertGeek/mixfilecli'
           path: 'upstream_source'
 
-      # 第 3 步：设置 JDK 8 环境
-      - name: Set up JDK 8
+      # 第 3 步：设置 JDK 17 环境
+      # 这个JDK版本用于驱动构建过程，与Dockerfile的第一阶段保持一致
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
 
       # 第 4 步：登录到 Docker Hub
@@ -55,4 +56,4 @@ jobs:
           # file 指向我们自己仓库中的 Dockerfile
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixf:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixfilecli:latest
