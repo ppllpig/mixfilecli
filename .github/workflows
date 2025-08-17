@@ -55,4 +55,4 @@ jobs:
           # file 指向我们自己仓库中的 Dockerfile
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixfilecli:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixf:latest
