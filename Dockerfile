@@ -1,7 +1,11 @@
 # --- STAGE 1: 构建环境 (Builder) ---
-# 使用一个高版本的 JDK (如 17) 来确保 Gradle Wrapper 本身能够运行，无论其版本如何。
-# 这提供了最佳的构建兼容性。
+# 使用一个高版本的 JDK (如 17) 作为基础，以确保 Gradle Wrapper 本身能够运行。
 FROM openjdk:17-jdk-slim as builder
+
+# 安装项目 toolchain 所需的 JDK 8。
+# apt-get update && apt-get install -y openjdk-8-jdk
+# 这样构建环境中就同时存在了 JDK 17 (默认) 和 JDK 8。
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk
 
 WORKDIR /app
 
@@ -17,8 +21,8 @@ COPY src src
 RUN chmod +x ./gradlew
 
 # 运行 gradle build。
-# Gradle 会根据 build.gradle.kts 的设置 (targetCompatibility = 1.8)
-# 自动将代码编译成 Java 8 兼容的字节码。
+# Gradle Wrapper 会使用默认的 JDK 17 启动。
+# 但由于 toolchain 的配置，Gradle 会自动检测并使用我们刚刚安装的 JDK 8 来编译代码。
 RUN ./gradlew build -x test --no-daemon
 
 # --- STAGE 2: 运行环境 (Final Image) ---
