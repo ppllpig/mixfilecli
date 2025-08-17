@@ -1,6 +1,7 @@
-# --- STAGE 1: 构建环境 ---
-# 使用与项目匹配的 Java 8 JDK slim 镜像
-FROM openjdk:8-jdk-slim as builder
+# --- STAGE 1: 构建环境 (Builder) ---
+# 使用一个高版本的 JDK (如 17) 来确保 Gradle Wrapper 本身能够运行，无论其版本如何。
+# 这提供了最佳的构建兼容性。
+FROM openjdk:17-jdk-slim as builder
 
 WORKDIR /app
 
@@ -14,19 +15,19 @@ COPY src src
 # 赋予 gradlew 执行权限
 RUN chmod +x ./gradlew
 
-# 运行 gradle build 来构建 fat jar
-# --no-daemon 确保在 CI 环境中不会有后台进程残留
+# 运行 gradle build。
+# Gradle 会根据 build.gradle.kts 的设置 (targetCompatibility = 1.8)
+# 自动将代码编译成 Java 8 兼容的字节码。
 RUN ./gradlew build -x test --no-daemon
 
-# --- STAGE 2: 运行环境 ---
-# 使用更小的 Java 8 JRE slim 镜像作为最终镜像
+# --- STAGE 2: 运行环境 (Final Image) ---
+# 最终的运行环境严格使用项目所需的 Java 8 JRE。
 FROM openjdk:8-jre-slim
 
 WORKDIR /app
 
-# 从构建阶段复制最终生成的 fat jar
-# 根据 build.gradle.kts 的配置，产物名称是 mixfile-cli-1.12.2.jar
-# 为了通用性，我们仍然可以使用通配符
+# 从构建阶段复制最终生成的 fat jar。
+# 这个 jar 包已经是 Java 8 兼容的了。
 COPY --from=builder /app/build/libs/mixfile-cli-*.jar app.jar
 
 # 容器启动时执行的命令
