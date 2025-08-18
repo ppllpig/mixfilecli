@@ -46,5 +46,9 @@ COPY --from=builder /app/build/libs/mixfile-cli-*.jar app.jar
 # 从构建阶段复制默认的配置文件，以便在首次运行时可以自动生成
 COPY --from=builder /app/src/main/resources/config.yml /app/config.yml.default
 
-# 容器启动时执行的命令
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 复制 entrypoint 脚本并赋予执行权限
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# 将 entrypoint 脚本设置为容器的启动入口
+ENTRYPOINT ["/app/entrypoint.sh"]
