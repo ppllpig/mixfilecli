@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  mixfile-cli:
+    # ！！！重要！！！
+    # 请将下面的 'DOCKERHUB_USERNAME' 替换成你自己的 Docker Hub 用户名
+    image: DOCKERHUB_USERNAME/mixfilecli:latest
+    container_name: mixfile-cli
+    ports:
+      - "4719:4719"
+    volumes:
+      # 将宿主机的 ./mixfile-data 目录挂载到容器的 /app/data 目录
+      # 配置文件 config.yml 和所有上传下载的数据都会存放在这里
+      - ./mixfile-data:/app/data
+    restart: always
+    # 容器的启动逻辑现在由镜像内部的 entrypoint.sh 脚本处理
+    # 我们不再需要在这里覆盖 command
