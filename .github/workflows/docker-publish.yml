@@ -21,7 +21,7 @@ jobs:
     steps:
       # 第 1 步：检出你自己的仓库
       # 目的是为了获取我们编写的 Dockerfile
-      - name: Checkout this repo (for Dockerfile)
+      - name: Checkout this repo (for Dockerfile and entrypoint)
         uses: actions/checkout@v4
 
       # 第 2 步：检出上游仓库的源代码
@@ -58,9 +58,9 @@ jobs:
       - name: Build and push multi-platform image
         uses: docker/build-push-action@v5
         with:
-          context: ./upstream_source
+          context: .
           file: ./Dockerfile
           push: true
           # 关键：指定要构建的目标平台
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixfile:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mixfilecli:latest
