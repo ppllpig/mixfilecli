@@ -43,5 +43,8 @@ WORKDIR /app
 # 这个 jar 包已经是 Java 8 兼容的了。
 COPY --from=builder /app/build/libs/mixfile-cli-*.jar app.jar
 
+# 从构建阶段复制默认的配置文件，以便在首次运行时可以自动生成
+COPY --from=builder /app/src/main/resources/config.yml /app/config.yml.default
+
 # 容器启动时执行的命令
 ENTRYPOINT ["java", "-jar", "app.jar"]
