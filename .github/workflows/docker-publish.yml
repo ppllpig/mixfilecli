@@ -105,6 +105,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           
       # 第 11 步：输出跳过信息
+      # 【已修正】确保此步骤的缩进与前面的步骤完全一致
       - name: Build skipped
         if: steps.cache-check.outputs.cache-hit == 'true'
-        run: echo "Build skipped: An image for commit ${{ steps.upstream-info.outputs.sha }} has already been built."
+        run: |
+          echo "Build skipped: An image for commit ${{ steps.upstream-info.outputs.sha }} has already been built."
+
