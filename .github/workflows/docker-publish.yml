@@ -31,7 +31,8 @@ jobs:
       - name: Get upstream commit SHA
         id: upstream-info
         run: |
-          UPSTREAM_SHA=$(gh api repos/InvertGeek/mixfilecli/commits/main --jq .sha)
+          # 【已修正】将 'main' 修改为 'master' 以匹配上游仓库的默认分支
+          UPSTREAM_SHA=$(gh api repos/InvertGeek/mixfilecli/commits/master --jq .sha)
           echo "Latest upstream SHA is ${UPSTREAM_SHA}"
           echo "sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
         env:
@@ -105,9 +106,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           
       # 第 11 步：输出跳过信息
-      # 【已修正】确保此步骤的缩进与前面的步骤完全一致
       - name: Build skipped
         if: steps.cache-check.outputs.cache-hit == 'true'
         run: |
           echo "Build skipped: An image for commit ${{ steps.upstream-info.outputs.sha }} has already been built."
-
