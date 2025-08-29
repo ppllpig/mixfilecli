@@ -5,7 +5,7 @@ name: Sync Upstream and Build Docker Image
 on:
   # 1. 定时触发：使用 cron 语法，这里设置为每天 UTC 时间 6:00 运行一次
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 3 * * *'
   
   # 2. 手动触发：允许你在 GitHub Actions 页面点击按钮手动运行
   workflow_dispatch:
@@ -18,49 +18,114 @@ jobs:
   build-from-upstream:
     runs-on: ubuntu-latest
 
+    # 【新增】为工作流步骤授予调用 GitHub API 所需的权限
+    permissions:
+      contents: read # 至少需要读取权限来与 API 交互
+
     steps:
       # 第 1 步：检出你自己的仓库
       # 目的是为了获取我们编写的 Dockerfile
       - name: Checkout this repo (for Dockerfile and entrypoint)
         uses: actions/checkout@v4
 
-      # 第 2 步：检出上游仓库的源代码
-      # 将 InvertGeek/mixfilecli 的最新代码下载到名为 'upstream_source' 的子目录中
+      # 【新增】第 2 步：获取上游仓库最新的 Commit SHA
+      # 这是整个逻辑的核心，我们用这个 SHA 来判断上游代码是否有变化
+      - name: Get upstream commit SHA
+        id: upstream-info
+        run: |
+          # 使用 GitHub CLI (gh) 调用 API 获取最新 commit 的 sha
+          # --jq .sha 表示只提取返回 JSON 中的 sha 字段
+          UPSTREAM_SHA=$(gh api repos/InvertGeek/mixfilecli/commits/main --jq .sha)
+          echo "Latest upstream SHA is ${UPSTREAM_SHA}"
+          # 将 SHA 设为步骤的输出，方便后续步骤引用
+          echo "sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
+        env:
+          # 工作流自动提供的 GITHUB_TOKEN，用于 API 认证
+          GH_TOKEN: ${{ github.token }}
+      
+      # 【新增】第 3 步：检查该版本的代码是否已经构建过
+      # 我们使用上一步获取的 SHA 作为缓存的 key
+      # 如果缓存命中 (cache-hit)，说明这个版本已经构建过，后续步骤将跳过
+      - name: Check if image for this commit was already built
+        id: cache-check
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dummy-path # 缓存内容不重要，我们只关心是否命中
+          key: build-cache-${{ steps.upstream-info.outputs.sha }}
+
+      # 第 4 步：检出上游仓库的源代码
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Checkout upstream repo (for source code)
+        if: steps.cache-check.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
           repository: 'InvertGeek/mixfilecli'
           path: 'upstream_source'
+          # 【修改】直接检出我们已经确定的那个 SHA，保证代码版本的一致性
+          ref: ${{ steps.upstream-info.outputs.sha }}
 
-      # 第 3 步：设置 JDK 17 环境
+      # 第 5 步：设置 JDK 17 环境
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Set up JDK 17
+        if: steps.cache-check.outputs.cache-hit != 'true'
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      # 第 4 步：设置 QEMU (用于模拟不同 CPU 架构)
+          
+      # 第 6 步：设置 QEMU (用于模拟不同 CPU 架构)
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Set up QEMU
+        if: steps.cache-check.outputs.cache-hit != 'true'
         uses: docker/setup-qemu-action@v3
 
-      # 第 5 步：设置 Docker Buildx (多平台构建器)
+      # 第 7 步：设置 Docker Buildx (多平台构建器)
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Set up Docker Buildx
+        if: steps.cache-check.outputs.cache-hit != 'true'
+        id: buildx
         uses: docker/setup-buildx-action@v3
 
-      # 第 6 步：登录到 Docker Hub
+      # 第 8 步：登录到 Docker Hub
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Log in to Docker Hub
+        if: steps.cache-check.outputs.cache-hit != 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 第 7 步：构建并推送多平台 Docker 镜像
+      # 【新增】第 9 步：生成 Docker 镜像的元数据（标签）
+      # 这是一项最佳实践，我们为镜像打上 latest 和具体的 Commit SHA 标签
+      # 这样不仅能用 latest，还能追溯到具体的代码版本
+      - name: Docker meta
+        if: steps.cache-check.outputs.cache-hit != 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/mfile
+          tags: |
+            type=schedule,pattern=latest
+            type=sha,prefix=,suffix=,format=short
+            
+      # 第 10 步：构建并推送多平台 Docker 镜像
+      # 【修改】仅在需要构建时才执行此步骤
       - name: Build and push multi-platform image
+        if: steps.cache-check.outputs.cache-hit != 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          # 关键：指定要构建的目标平台
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mfile:latest
+          # 【修改】使用上一步生成的标签
+          tags: ${{ steps.meta.outputs.tags }}
+          # 【推荐】在镜像中加入标签，记录构建时所用的上游代码版本
+          labels: ${{ steps.meta.outputs.labels }}
+          
+      # 【新增】第 11 步：输出跳过信息
+      # 如果因为缓存命中而跳过了构建，这里会打印一条清晰的日志，方便排查
+      - name: Build skipped
+        if: steps.cache-check.outputs.cache-hit == 'true'
+        run: echo "Build skipped: An image for commit ${{ steps.upstream-info.outputs.sha }} has already been built."
+
