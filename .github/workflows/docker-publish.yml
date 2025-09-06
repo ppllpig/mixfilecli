@@ -100,7 +100,7 @@ jobs:
           tags: |
             type=raw,value=${{ steps.project-version.outputs.version }}
             type=sha,prefix=,suffix=,format=short
-            type=schedule,pattern=latest
+            type=raw,value=latest,enable=${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
             type=ref,event=branch,enable=${{ github.ref == 'refs/heads/main' }},suffix=-latest
             
       # 第 10 步：构建并推送多平台 Docker 镜像
