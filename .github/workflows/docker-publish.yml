@@ -37,14 +37,22 @@ jobs:
           echo "sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ github.token }}
-      
-      # 第 3 步：检查该版本的代码是否已经构建过
+
+      # 第 3 步：获取项目版本号
+      - name: Get project version
+        id: project-version
+        run: |
+          PROJECT_VERSION=$(grep -oP 'projectVersion = "\K[^"]+' build.gradle.kts)
+          echo "Project version is ${PROJECT_VERSION}"
+          echo "version=${PROJECT_VERSION}" >> $GITHUB_OUTPUT
+
+      # 第 4 步：检查该版本的代码是否已经构建过
       - name: Check if image for this commit was already built
         id: cache-check
         uses: actions/cache@v4
         with:
-          path: ~/.cache/dummy-path 
-          key: build-cache-${{ steps.upstream-info.outputs.sha }}
+          path: ~/.cache/dummy-path
+          key: build-cache-${{ steps.upstream-info.outputs.sha }}-${{ steps.project-version.outputs.version }}
 
       # 第 4 步：检出上游仓库的源代码
       - name: Checkout upstream repo (for source code)
@@ -90,8 +98,10 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/mfile
           tags: |
-            type=schedule,pattern=latest
+            type=raw,value=${{ steps.project-version.outputs.version }}
             type=sha,prefix=,suffix=,format=short
+            type=schedule,pattern=latest
+            type=ref,event=branch,enable=${{ github.ref == 'refs/heads/main' }},suffix=-latest
             
       # 第 10 步：构建并推送多平台 Docker 镜像
       - name: Build and push multi-platform image
