@@ -20,7 +20,7 @@ jobs:
 
     # 为工作流步骤授予调用 GitHub API 所需的权限
     permissions:
-      contents: read 
+      contents: write
 
     steps:
       # 第 1 步：检出你自己的仓库
