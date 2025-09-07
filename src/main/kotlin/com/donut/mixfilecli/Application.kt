@@ -144,7 +144,7 @@ fun main(args: Array<String>) {
 
     val webDavManager = object : WebDavManager() {
         override suspend fun saveWebDavData(data: ByteArray) {
-            saveFileData(config.webdavPath, data)
+            saveFileData(config.webdavPath, compressGzip(data))
         }
     }
 
