@@ -4,8 +4,16 @@ name: Sync Upstream and Build Docker Image
 # 触发工作流的事件
 on:
   # 1. 定时触发：设置为每 3 小时运行一次
-  # 1. 手动触发：允许你在 GitHub Actions 页面点击按钮手动运行
+  # 1. 定时触发：设置为每 3 小时运行一次
+  schedule:
+    - cron: '0 */3 * * *'
+  
+  # 2. 手动触发：允许你在 GitHub Actions 页面点击按钮手动运行
   workflow_dispatch:
+
+  # 3. 推送触发：当你修改此工作流文件并推送到 main 分支时触发
+  push:
+    branches: [ "main" ]
 
 jobs:
   build-from-upstream:
