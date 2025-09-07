@@ -26,11 +26,13 @@ if [ ! -f "$WEB_DAV_FILE" ]; then
     # 1f8b0800efd5bc6802ff03000000000000000000
     echo -ne '\x1f\x8b\x08\x00\xef\xd5\xbc\x68\x02\xff\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00' > "$WEB_DAV_FILE"
 fi
-
 # 检查并创建 history.mix_list 文件
 if [ ! -f "$HISTORY_FILE" ]; then
-    echo "History file not found. Creating empty file at $HISTORY_FILE"
-    touch "$HISTORY_FILE"
+    echo "History file not found. Creating empty GZIP file at $HISTORY_FILE"
+    # 一个空的 GZIP 文件（20 字节）
+    # 1f8b0800efd5bc6802ff03000000000000000000
+    echo -ne '\x1f\x8b\x08\x00\xef\xd5\xbc\x68\x02\xff\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00' > "$HISTORY_FILE"
+fi
 fi
 
 # 使用 exec 来执行 Java 应用。
