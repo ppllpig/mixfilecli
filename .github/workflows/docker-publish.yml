@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 0 # 获取所有历史记录，以便进行合并
 
+      # 新增步骤：配置 Git 用户
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       # 新增步骤：添加上游远程仓库并拉取更改
       - name: Add upstream remote and fetch
         run: |
