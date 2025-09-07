@@ -26,13 +26,30 @@ jobs:
       # 第 1 步：检出你自己的仓库
       - name: Checkout this repo (for Dockerfile and entrypoint)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取所有历史记录，以便进行合并
 
-      # 第 2 步：获取上游仓库最新的 Commit SHA
+      # 新增步骤：添加上游远程仓库并拉取更改
+      - name: Add upstream remote and fetch
+        run: |
+          git remote add upstream https://github.com/InvertGeek/mixfilecli.git
+          git fetch upstream
+
+      # 新增步骤：合并上游更改到当前分支
+      - name: Merge upstream changes
+        run: |
+          git merge upstream/master --allow-unrelated-histories -m "Merge upstream master into master"
+          
+      # 新增步骤：推送到当前仓库的 main 分支
+      - name: Push changes to main branch
+        run: |
+          git push origin master
+
+      # 第 2 步：获取上游仓库最新的 Commit SHA (现在在上游同步之后执行)
       - name: Get upstream commit SHA
         id: upstream-info
         run: |
-          # 【已修正】将 'main' 修改为 'master' 以匹配上游仓库的默认分支
-          UPSTREAM_SHA=$(gh api repos/InvertGeek/mixfilecli/commits/master --jq .sha)
+          UPSTREAM_SHA=$(git rev-parse HEAD) # 获取当前仓库的最新 commit SHA
           echo "Latest upstream SHA is ${UPSTREAM_SHA}"
           echo "sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
         env:
@@ -52,16 +69,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/dummy-path
-          key: build-cache-${{ steps.upstream-info.outputs.sha }}-${{ steps.project-version.outputs.version }}
+          key: build-cache-${{ steps.upstream-info.outputs.sha }} # 缓存键只依赖于 commit SHA
+          restore-keys: |
+            build-cache-${{ steps.upstream-info.outputs.sha }}
 
-      # 第 4 步：检出上游仓库的源代码
-      - name: Checkout upstream repo (for source code)
-        if: steps.cache-check.outputs.cache-hit != 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: 'InvertGeek/mixfilecli'
-          path: 'upstream_source'
-          ref: ${{ steps.upstream-info.outputs.sha }}
+      # 第 4 步：检出上游仓库的源代码 (此步骤不再需要，因为已经合并到当前仓库)
+      # - name: Checkout upstream repo (for source code)
+      #   if: steps.cache-check.outputs.cache-hit != 'true'
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: 'InvertGeek/mixfilecli'
+      #     path: 'upstream_source'
+      #     ref: ${{ steps.upstream-info.outputs.sha }}
 
       # 第 5 步：设置 JDK 17 环境
       - name: Set up JDK 17
@@ -101,7 +120,7 @@ jobs:
             type=raw,value=${{ steps.project-version.outputs.version }}
             type=sha,prefix=,suffix=,format=short
             type=raw,value=latest,enable=${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
-            type=ref,event=branch,enable=${{ github.ref == 'refs/heads/main' }},suffix=-latest
+            type=ref,event=branch,enable=${{ github.ref == 'refs/heads/master' }},suffix=-latest
             
       # 第 10 步：构建并推送多平台 Docker 镜像
       - name: Build and push multi-platform image
