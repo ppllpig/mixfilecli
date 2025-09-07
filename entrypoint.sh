@@ -33,7 +33,6 @@ if [ ! -f "$HISTORY_FILE" ]; then
     # 1f8b0800efd5bc6802ff03000000000000000000
     echo -ne '\x1f\x8b\x08\x00\xef\xd5\xbc\x68\x02\xff\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00' > "$HISTORY_FILE"
 fi
-fi
 
 # 使用 exec 来执行 Java 应用。
 # 这会让 Java 进程替换掉 shell 进程，成为容器的主进程 (PID 1)，
