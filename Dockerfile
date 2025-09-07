@@ -2,7 +2,18 @@
 # 使用一个高版本的 JDK (如 17) 作为基础，以确保 Gradle Wrapper 本身能够运行。
 FROM openjdk:17-jdk-slim as builder
 
-# 构建环境已经提供了 JDK 17，与我们的 toolchain 版本一致，无需额外安装。
+# 安装项目 toolchain 所需的 JDK 8。
+# 由于 Debian 11 (Bullseye) 的默认源中没有 openjdk-8-jdk，
+# 我们需要添加 Eclipse Temurin (前 AdoptOpenJDK) 的软件源来安装。
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    apt-transport-https \
+    gnupg \
+    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor > /usr/share/keyrings/adoptium.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bullseye main" > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends temurin-8-jdk \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
