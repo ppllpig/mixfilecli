@@ -17,6 +17,20 @@ fi
 # 确保数据目录存在
 mkdir -p "$DATA_DIR"
 
+# 检查并创建 data.mix_dav 文件
+WEB_DAV_FILE="$DATA_DIR/data.mix_dav"
+if [ ! -f "$WEB_DAV_FILE" ]; then
+    echo "WebDAV data file not found. Creating initial empty GZIP file at $WEB_DAV_FILE"
+    echo '{}' | gzip > "$WEB_DAV_FILE"
+fi
+
+# 检查并创建 history.mix_list 文件
+HISTORY_FILE="$DATA_DIR/history.mix_list"
+if [ ! -f "$HISTORY_FILE" ]; then
+    echo "History file not found. Creating initial empty GZIP file at $HISTORY_FILE"
+    echo '[]' | gzip > "$HISTORY_FILE"
+fi
+
 # 使用 exec 来执行 Java 应用。
 # 这会让 Java 进程替换掉 shell 进程，成为容器的主进程 (PID 1)，
 # 从而能够正确地接收和处理来自 Docker 的停止信号 (如 SIGTERM)。
