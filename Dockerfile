@@ -18,12 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # 复制构建所需的文件
-COPY upstream_source/gradlew .
-COPY upstream_source/gradle gradle
-COPY upstream_source/build.gradle.kts .
-COPY upstream_source/settings.gradle.kts .
-COPY upstream_source/gradle.properties .
-COPY upstream_source/src src
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
+COPY gradle.properties .
+COPY src src
 
 # 赋予 gradlew 执行权限
 RUN chmod +x ./gradlew
