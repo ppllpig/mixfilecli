@@ -24,7 +24,7 @@ if [ ! -f "$WEB_DAV_FILE" ]; then
     echo "WebDAV data file not found. Creating empty GZIP file at $WEB_DAV_FILE"
     # 一个空的 GZIP 文件（20 字节）
     # 1f8b0800efd5bc6802ff03000000000000000000
-    echo '<?xml version="1.0" encoding="utf-8" ?><D:multistatus xmlns:D="DAV:"></D:multistatus>' | gzip > "$WEB_DAV_FILE"
+    echo '{}' | gzip > "$WEB_DAV_FILE"
 fi
 # 检查并创建 history.mix_list 文件
 if [ ! -f "$HISTORY_FILE" ]; then
