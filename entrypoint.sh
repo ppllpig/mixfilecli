@@ -41,7 +41,7 @@ RETRY_COUNT=0
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     echo "Attempting to start Java application (Attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
     cd "$DATA_DIR"
-    java -XX:+UseZGC -jar ../app.jar --spring.config.location=file:"$CONFIG_FILE"
+    java -XX:+UseZGC -XX:ZUncommitDelay=10 -XX:MaxHeapSize=1g -jar ../app.jar --spring.config.location=file:"$CONFIG_FILE"
     EXIT_CODE=$?
 
     if [ $EXIT_CODE -eq 0 ]; then
