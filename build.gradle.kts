@@ -6,10 +6,10 @@ val logback_version: String by project
 plugins {
     java // 确保应用了 Java 插件
     kotlin("jvm") version "2.2.0"
-    id("io.ktor.plugin") version "3.2.2"
+    id("io.ktor.plugin") version "3.3.1"
     kotlin("plugin.serialization") version "2.2.0"
 }
-val projectVersion = "2.0.1"
+val projectVersion = "2.0.2"
 
 group = "com.donut.mixfilecli"
 version = projectVersion
@@ -56,7 +56,7 @@ ktor {
 
 dependencies {
     implementation("com.charleskorn.kaml:kaml:0.79.0")
-    implementation("com.github.invertgeek:mixfile-core:2.0.1")
+    implementation("com.github.invertgeek:mixfile-core:2.0.2")
     implementation("ch.qos.logback:logback-classic:1.3.15")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
