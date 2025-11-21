@@ -1,6 +1,6 @@
 # --- STAGE 1: 构建环境 (Builder) ---
 # 使用一个高版本的 JDK (如 17) 作为基础，以确保 Gradle Wrapper 本身能够运行。
-FROM openjdk:17-jdk-slim as builder
+FROM eclipse-temurin:17-jdk-slim AS builder
 
 # 安装项目 toolchain 所需的 JDK 8。
 # 由于 Debian 11 (Bullseye) 的默认源中没有 openjdk-8-jdk，
@@ -52,4 +52,5 @@ RUN chmod +x /app/entrypoint.sh
 
 # 将 entrypoint 脚本设置为容器的启动入口
 ENTRYPOINT ["/app/entrypoint.sh"]
+
 
