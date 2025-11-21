@@ -35,7 +35,7 @@ RUN ./gradlew build -x test --no-daemon
 
 # --- STAGE 2: 运行环境 (Final Image) ---
 # 最终的运行环境严格使用项目所需的 Java 8 JRE。
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
@@ -52,3 +52,4 @@ RUN chmod +x /app/entrypoint.sh
 
 # 将 entrypoint 脚本设置为容器的启动入口
 ENTRYPOINT ["/app/entrypoint.sh"]
+
