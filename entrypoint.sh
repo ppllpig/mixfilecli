@@ -46,6 +46,6 @@ echo "Initialization complete. Starting Java application..."
 exec /opt/java/openjdk/bin/java \
     -XX:+UseZGC \
     -XX:ZUncommitDelay=10 \
-    -XX:MaxHeapSize=1g \
+    -XX:MaxHeapSize=2g \
     -jar ../app.jar \
     --spring.config.location=file:"$CONFIG_FILE"
