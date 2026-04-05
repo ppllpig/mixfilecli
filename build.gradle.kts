@@ -9,7 +9,7 @@ plugins {
     id("io.ktor.plugin") version "3.2.3"
     kotlin("plugin.serialization") version "2.2.0"
 }
-val projectVersion = "2.0.6"
+val projectVersion = "2.0.7"
 
 group = "com.donut.mixfilecli"
 version = projectVersion
@@ -56,7 +56,7 @@ ktor {
 
 dependencies {
     implementation("com.charleskorn.kaml:kaml:0.79.0")
-    implementation("com.github.InvertGeek:mixfile-core:2.0.6")
+    implementation("com.github.InvertGeek:mixfile-core:2.0.7")
     implementation("ch.qos.logback:logback-classic:1.3.15")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
